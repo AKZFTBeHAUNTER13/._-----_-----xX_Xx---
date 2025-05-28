@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Poison Hub</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: white;
+    }
+
+    .sidebar {
+      position: fixed;
+      width: 220px;
+      height: 100%;
+      background-color: #ffcc00;
+      padding: 20px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar h1 {
+      color: white;
+      font-size: 22px;
+    }
+
+    .sidebar button {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+      padding: 10px;
+      background: black;
+      border: none;
+      color: white;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background: #222;
+    }
+
+    .main {
+      margin-left: 240px;
+      padding: 30px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    input[type="file"] {
+      background: #333;
+      padding: 10px;
+      color: white;
+      border: none;
+    }
+
+    .history ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .history li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h1>Poison Hub</h1>
+    <button onclick="showSection('protection')">🔒 Protegimento</button>
+  </div>
+
+  <div class="main">
+    <div id="protection" class="section active">
+      <h2>📤 Proteção</h2>
+      <form id="uploadForm">
+        <input type="file" name="file" accept=".lua" required />
+        <button type="submit">Enviar</button>
+      </form>
+
+      <h3>📜 Histórico</h3>
+      <div class="history">
+        <ul id="historyList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const historyList = document.getElementById('historyList');
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const res = await fetch('/.netlify/functions/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.rawUrl) {
+        const link = `${window.location.origin}${data.rawUrl}`;
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
+        historyList.appendChild(li);
+      }
+    });
+  </script>
+</body>
+</html>
